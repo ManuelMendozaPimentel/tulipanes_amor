@@ -30,7 +30,6 @@
           font-family: 'Georgia', 'Times New Roman', serif;
         }
 
-        /* Fondo azul noche degradado */
         .night {
           position: fixed;
           left: 0;
@@ -42,13 +41,11 @@
           transition: filter 1.2s cubic-bezier(0.2, 0.9, 0.4, 1.1), background 1s ease;
         }
         
-        /* Oscurecimiento final para TE AMO */
         body.final-te-amo .night {
           background: radial-gradient(ellipse at 60% 10%, #000000 0%, #030617 60%, #010007 100%);
           filter: brightness(0.45) blur(2px);
         }
         
-        /* Capa extra de oscuridad para resaltar TE AMO */
         .final-overlay {
           position: fixed;
           inset: 0;
@@ -62,7 +59,6 @@
           background: rgba(0, 0, 0, 0.7);
         }
 
-        /* Estrellas estáticas con canvas JS */
         #stars-canvas {
           position: fixed;
           inset: 0;
@@ -72,7 +68,7 @@
           pointer-events: none;
         }
 
-        /* Neblina / aurora sutil en el horizonte */
+
         .night::after {
           content: '';
           position: absolute;
@@ -162,7 +158,6 @@
           100% { transform: translate3d(0, -112vh, 0) scale(1.35); opacity: 0; }
         }
 
-        /* === FRASES LATERALES: izquierda y derecha (animación fade + alternancia) === */
         .frases-container {
           position: fixed;
           inset: 0;
@@ -214,7 +209,6 @@
           transform: translateY(-12px);
         }
         
-        /* Ajuste móvil */
         @media (max-width: 640px) {
           .frases-container {
             padding: 0 4vw;
@@ -229,7 +223,6 @@
           }
         }
         
-        /* Título centrado: Para ti, con todo mi amor y los tulipanes */
         .titulo-central {
           position: fixed;
           top: 4vh;
@@ -265,7 +258,6 @@
           }
         }
         
-        /* TE AMO FINAL (amarillo, fondo oscurecido) */
         .te-amo-final {
           position: fixed;
           top: 50%;
@@ -294,7 +286,6 @@
           transform: translate(-50%, -50%) scale(1);
         }
         
-        /* Resto estilos de flores (original intacto, solo se agrega el resto) */
         .flowers { position: relative; transform: scale(0.7); z-index: 2; }
         @media (max-width: 600px) { .flowers { transform: scale(1.05); transform-origin: bottom center; } }
         .flower { position: absolute; bottom: 15vmin; transform-origin: bottom center; z-index: 50; }
@@ -331,7 +322,6 @@
         .montes { position: absolute; left: 0; right: 0; bottom: -10px; width: 100%; height: 60px; pointer-events: none; display: flex; justify-content: space-between; opacity: 0; transition: opacity 1.2s; z-index: 1; }
         .ramo--visible .montes { opacity: 1; }
         
-        /* Keyframes extra */
         @keyframes moving-flower-1 { 0%,100%{transform:rotate(2deg)} 50%{transform:rotate(-2deg)} }
         @keyframes moving-flower-2 { 0%,100%{transform:rotate(18deg)} 50%{transform:rotate(14deg)} }
         @keyframes moving-flower-3 { 0%,100%{transform:rotate(-18deg)} 50%{transform:rotate(-20deg)} }
@@ -349,10 +339,8 @@
   <div class="final-overlay"></div>
   <canvas id="stars-canvas"></canvas>
   
-  <!-- Título centrado: Para ti, con todo mi amor y los tulipanes -->
   <div class="titulo-central">🌷 Para ti, con todo mi amor y los tulipanes 🌷</div>
   
-  <!-- Contenedor de frases izquierda/derecha -->
   <div class="frases-container">
     <div class="frases-izq">
       <p class="frase frase--1">Aunque no siempre<br>estemos sonriendo...</p>
@@ -366,7 +354,6 @@
     </div>
   </div>
   
-  <!-- TE AMO final amarillo -->
   <div class="te-amo-final">💛 TE AMO 💛</div>
   
   <div class="yellow-particles">
@@ -392,7 +379,6 @@
   
   <div class="shooting-stars"><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div></div>
   
-  <!-- Flores (estructura original, pero añadidas todas para que se vea el ramo) -->
   <div class="flowers">
     <div class="flower flower--1"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div><div class="flower__light"></div><div class="flower__light"></div></div><div class="flower__line"><div class="flower__line__leaf flower__line__leaf--1"></div><div class="flower__line__leaf flower__line__leaf--2"></div><div class="flower__line__leaf flower__line__leaf--3"></div><div class="flower__line__leaf flower__line__leaf--4"></div></div></div>
     <div class="flower flower--2"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"><div class="flower__line__leaf flower__line__leaf--1"></div><div class="flower__line__leaf flower__line__leaf--2"></div><div class="flower__line__leaf flower__line__leaf--3"></div><div class="flower__line__leaf flower__line__leaf--4"></div></div></div>
@@ -434,10 +420,8 @@
       window.addEventListener('resize', ()=>{ resize(); createStars(220); });
     })();
     
-    // ramo visible
     setTimeout(() => document.querySelector('.ramo')?.classList.add('ramo--visible'), 2500);
     
-    // ---- ANIMACIÓN DE FRASES (alternar izquierda y derecha) ----
     const frasesIzq = document.querySelectorAll('.frases-izq .frase');
     const frasesDer = document.querySelectorAll('.frases-der .frase');
     const todasFrases = [...frasesIzq, ...frasesDer];
@@ -447,14 +431,13 @@
     let animationActive = true;
     let timeoutId = null;
     
-    // Orden de aparición: izquierda(1), derecha(2), izquierda(3), derecha(4), izquierda(5), derecha(6)
     const ordenSecuencia = [
-      { lado: 'izq', idx: 0 },  // frase--1 (Aunque no siempre)
-      { lado: 'der', idx: 0 },  // frase--2 (Xq incluso en silencio)
-      { lado: 'izq', idx: 1 },  // frase--3 (Hoy contigo)
-      { lado: 'der', idx: 1 },  // frase--4 (Tu mano en la mía)
-      { lado: 'izq', idx: 2 },  // frase--5 (Gracias por existir)
-      { lado: 'der', idx: 2 }   // frase--6 (Te amo más de lo que palabras)
+      { lado: 'izq', idx: 0 },
+      { lado: 'der', idx: 0 },
+      { lado: 'izq', idx: 1 },
+      { lado: 'der', idx: 1 },
+      { lado: 'izq', idx: 2 },
+      { lado: 'der', idx: 2 }
     ];
     
     function ocultarTodas() {
@@ -464,10 +447,8 @@
     function mostrarFrase(step) {
       if (!animationActive) return;
       if (step >= ordenSecuencia.length) {
-        // Terminó la secuencia de frases → activar TE AMO final y oscurecer fondo
         animationActive = false;
         document.body.classList.add('final-te-amo');
-        // opcional: también pausar música suavemente? no se pide, pero queda ambiente
         return;
       }
       const item = ordenSecuencia[step];
@@ -475,34 +456,27 @@
       const fraseElem = grupo[item.idx];
       if (!fraseElem) return;
       
-      // ocultar todas primero para limpiar
       ocultarTodas();
-      // mostrar la nueva
       fraseElem.classList.remove('ocultar');
       fraseElem.classList.add('visible');
       
-      // Tiempo de aparición: 3.5 segundos visible, luego pasar a la siguiente
       timeoutId = setTimeout(() => {
         mostrarFrase(step + 1);
       }, 3800);
     }
     
-    // Iniciar después de que cargue todo y dar un pequeño delay para que se vea natural
     window.addEventListener('load', () => {
       setTimeout(() => {
         if (animationActive) mostrarFrase(0);
       }, 800);
     });
     
-    // Música (sin botón de música, pero igual se reproduce automáticamente / sin icono)
     const audio = document.getElementById('bgAudio');
     audio.loop = true;
     audio.volume = 0.6;
     window.addEventListener('load', () => {
       audio.play().catch(e => console.log("autoplay bloqueado, pero el usuario puede interactuar"));
     });
-    // también por si el navegador bloquea, se puede activar con un toque suave pero no hay botón,
-    // pero se deja autoplay silencioso compatible. El usuario puede tocar en cualquier lado para reanudar? opcional
     document.body.addEventListener('click', () => { if(audio.paused) audio.play().catch(()=>{}); }, { once: true });
   </script>
 </body>
