@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ramo de Tulipanes Amarillos · Te Amo</title>
+    <style>
+        *,
+        *::after,
+        *::before {
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
+        }
+
+        :root {
+          --dark-color: #020b18;
+          --fl-speed: 0.8s;
+          --speed-leaf: 2s;
+        }
+
+        body {
+          display: flex;
+          align-items: flex-end;
+          justify-content: center;
+          min-height: 100vh;
+          background-color: var(--dark-color);
+          overflow: hidden;
+          perspective: 1000px;
+          font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        /* Fondo azul noche degradado */
+        .night {
+          position: fixed;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background: radial-gradient(ellipse at 60% 10%, #1a2a6c 0%, #0d1b3e 40%, #020b18 100%);
+          z-index: 0;
+          transition: filter 1.2s cubic-bezier(0.2, 0.9, 0.4, 1.1), background 1s ease;
+        }
+        
+        /* Oscurecimiento final para TE AMO */
+        body.final-te-amo .night {
+          background: radial-gradient(ellipse at 60% 10%, #000000 0%, #030617 60%, #010007 100%);
+          filter: brightness(0.45) blur(2px);
+        }
+        
+        /* Capa extra de oscuridad para resaltar TE AMO */
+        .final-overlay {
+          position: fixed;
+          inset: 0;
+          background: rgba(0, 0, 0, 0);
+          z-index: 40;
+          pointer-events: none;
+          transition: background 1.2s ease;
+        }
+        
+        body.final-te-amo .final-overlay {
+          background: rgba(0, 0, 0, 0.7);
+        }
+
+        /* Estrellas estáticas con canvas JS */
+        #stars-canvas {
+          position: fixed;
+          inset: 0;
+          width: 100%;
+          height: 100%;
+          z-index: 1;
+          pointer-events: none;
+        }
+
+        /* Neblina / aurora sutil en el horizonte */
+        .night::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          height: 35%;
+          background: radial-gradient(ellipse at 50% 100%, rgba(30, 60, 120, 0.55) 0%, transparent 70%);
+        }
+
+        .shooting-stars {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 1;
+        }
+
+        .yellow-particles {
+          position: fixed;
+          inset: 0;
+          pointer-events: none;
+          z-index: 1;
+          overflow: hidden;
+        }
+
+        .yellow-particle {
+          position: absolute;
+          width: 0.9vmin;
+          height: 0.9vmin;
+          border-radius: 50%;
+          background: radial-gradient(circle, #fff6a8 0%, #ffd200 55%, #ffb300 100%);
+          box-shadow: 0 0 1.2vmin rgba(255, 214, 51, 0.85);
+          opacity: 0;
+          animation: float-yellow-particle linear infinite;
+        }
+
+        .shooting-star {
+          position: absolute;
+          width: 4px;
+          height: 4px;
+          background: #fff;
+          border-radius: 50%;
+          box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.8);
+          opacity: 0;
+          animation: shootingStar 3s linear infinite;
+        }
+
+        .shooting-star::before {
+          content: '';
+          position: absolute;
+          top: 50%;
+          right: 0;
+          transform: translateY(-50%);
+          width: 0;
+          height: 2px;
+          background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 1) 100%);
+          animation: shootingStarTail 3s linear infinite;
+        }
+
+        .shooting-star:nth-child(1) { top: 5%; left: -10%; animation-delay: 0s; animation-duration: 2.5s; }
+        .shooting-star:nth-child(2) { top: 15%; left: -10%; animation-delay: 2s; animation-duration: 3s; }
+        .shooting-star:nth-child(3) { top: 25%; left: -10%; animation-delay: 4s; animation-duration: 2.8s; }
+        .shooting-star:nth-child(4) { top: 0%; left: -10%; animation-delay: 6s; animation-duration: 3.2s; }
+        .shooting-star:nth-child(5) { top: 35%; left: -10%; animation-delay: 8s; animation-duration: 2.7s; }
+        .shooting-star:nth-child(6) { top: 8%; left: -10%; animation-delay: 10s; animation-duration: 3.1s; }
+        .shooting-star:nth-child(7) { top: 45%; left: -10%; animation-delay: 12s; animation-duration: 2.9s; }
+        .shooting-star:nth-child(8) { top: 3%; left: -10%; animation-delay: 14s; animation-duration: 3.3s; }
+
+        @keyframes shootingStar {
+          0% { opacity: 0; transform: translateX(0) translateY(0) rotate(45deg); }
+          10% { opacity: 1; }
+          90% { opacity: 1; }
+          100% { opacity: 0; transform: translateX(120vw) translateY(50vh) rotate(10deg); }
+        }
+        @keyframes shootingStarTail {
+          0% { width: 0; }
+          30% { width: 100px; }
+          100% { width: 0; }
+        }
+        @keyframes float-yellow-particle {
+          0% { transform: translate3d(0, 2vh, 0) scale(0.8); opacity: 0; }
+          10% { opacity: 0.95; }
+          60% { opacity: 0.75; }
+          100% { transform: translate3d(0, -112vh, 0) scale(1.35); opacity: 0; }
+        }
+
+        /* === FRASES LATERALES: izquierda y derecha (animación fade + alternancia) === */
+        .frases-container {
+          position: fixed;
+          inset: 0;
+          z-index: 35;
+          pointer-events: none;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 0 8vw;
+        }
+        
+        .frases-izq, .frases-der {
+          width: 42%;
+          max-width: 280px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          pointer-events: none;
+        }
+        
+        .frase {
+          font-family: 'Georgia', 'Times New Roman', cursive;
+          font-size: clamp(18px, 5vw, 28px);
+          font-weight: 500;
+          text-align: center;
+          background: rgba(10, 15, 35, 0.65);
+          backdrop-filter: blur(10px);
+          padding: 1.2rem 1rem;
+          border-radius: 58px 24px 58px 28px;
+          border-left: 5px solid #ffd966;
+          border-bottom: 2px solid #ffcd4a;
+          color: #FFFBE6;
+          text-shadow: 0 0 8px #ffb347, 0 2px 5px rgba(0,0,0,0.4);
+          letter-spacing: 0.02em;
+          line-height: 1.4;
+          opacity: 0;
+          transition: opacity 0.6s cubic-bezier(0.2, 0.9, 0.4, 1.1), transform 0.5s ease;
+          transform: translateY(18px);
+          box-shadow: 0 10px 25px -8px rgba(0,0,0,0.5);
+        }
+        
+        .frase.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
+        
+        .frase.ocultar {
+          opacity: 0;
+          transform: translateY(-12px);
+        }
+        
+        /* Ajuste móvil */
+        @media (max-width: 640px) {
+          .frases-container {
+            padding: 0 4vw;
+          }
+          .frases-izq, .frases-der {
+            width: 45%;
+          }
+          .frase {
+            font-size: 16px;
+            padding: 0.9rem 0.7rem;
+            border-radius: 40px 18px 40px 20px;
+          }
+        }
+        
+        /* Título centrado: Para ti, con todo mi amor y los tulipanes */
+        .titulo-central {
+          position: fixed;
+          top: 4vh;
+          left: 0;
+          right: 0;
+          text-align: center;
+          z-index: 45;
+          font-family: 'Georgia', serif;
+          font-size: clamp(18px, 5.5vw, 32px);
+          font-weight: bold;
+          color: #fff3c9;
+          text-shadow: 0 0 12px #ffbf40, 0 0 25px #ff9900, 2px 2px 0px #aa6f00;
+          background: linear-gradient(135deg, #FFF6CF, #FFE49E);
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          text-shadow: 0 2px 12px rgba(0,0,0,0.3);
+          letter-spacing: 1px;
+          backdrop-filter: blur(3px);
+          width: 100%;
+          padding: 12px 10px;
+          pointer-events: none;
+          white-space: nowrap;
+        }
+        
+        @media (max-width: 550px) {
+          .titulo-central {
+            white-space: normal;
+            font-size: 16px;
+            top: 2vh;
+            padding: 6px 8px;
+            line-height: 1.3;
+          }
+        }
+        
+        /* TE AMO FINAL (amarillo, fondo oscurecido) */
+        .te-amo-final {
+          position: fixed;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) scale(0.7);
+          z-index: 100;
+          font-family: 'Georgia', 'Impact', cursive;
+          font-size: clamp(52px, 15vw, 130px);
+          font-weight: 900;
+          text-align: center;
+          background: linear-gradient(145deg, #FFE484, #FFC107, #FFB347);
+          background-clip: text;
+          -webkit-background-clip: text;
+          color: transparent;
+          text-shadow: 0 0 25px #ffcc44, 0 0 50px #ffaa22, 0 0 15px #ffdd77;
+          letter-spacing: 8px;
+          opacity: 0;
+          transition: opacity 1.6s cubic-bezier(0.2, 0.9, 0.3, 1.2), transform 1.2s ease;
+          pointer-events: none;
+          white-space: nowrap;
+          filter: drop-shadow(0 8px 18px rgba(0,0,0,0.6));
+        }
+        
+        body.final-te-amo .te-amo-final {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1);
+        }
+        
+        /* Resto estilos de flores (original intacto, solo se agrega el resto) */
+        .flowers { position: relative; transform: scale(0.7); z-index: 2; }
+        @media (max-width: 600px) { .flowers { transform: scale(1.05); transform-origin: bottom center; } }
+        .flower { position: absolute; bottom: 15vmin; transform-origin: bottom center; z-index: 50; }
+        .flower--1 { animation: moving-flower-1 4s linear infinite; }
+        .flower--1 .flower__line { height: 70vmin; animation-delay: 0.3s; }
+        .flower--2 { left: 50%; transform: rotate(20deg); animation: moving-flower-2 4s linear infinite; }
+        .flower--2 .flower__line { height: 60vmin; }
+        .flower--3 { left: 50%; transform: rotate(-15deg); animation: moving-flower-3 4s linear infinite; }
+        .flower--4 { left: -25%; z-index: -6; transform: rotate(10deg); animation: moving-flower-4 3.5s linear infinite; }
+        .flower--4 .flower__line { height: 90vmin; }
+        .flower--5 { left: 75%; z-index: -7; transform: rotate(-25deg); animation: moving-flower-5 4.5s linear infinite; }
+        .flower__leafs { position: relative; animation: blooming-flower 2s backwards; }
+        .flower__leaf { position: absolute; bottom: 0; left: 50%; width: 9vmin; height: 15vmin; background: radial-gradient(circle at 50% 20%, #ffffb0 0%, #ffd700 40%, #ff9900 100%); border-radius: 50% 50% 40% 40% / 60% 60% 40% 40%; transform-origin: bottom center; opacity: 0.95; z-index: 2; border: 1.5px solid #ffcc33; box-shadow: 0 0 1vmin #fff9c4, 0 0 0.5vmin #ffd700, inset 0 0 1.5vmin rgba(255,255,255,0.6); }
+        .flower__leaf--1 { transform: translate(-50%, -5%) rotate(-22deg); z-index: 1; }
+        .flower__leaf--2 { transform: translate(-50%, -5%) rotate(22deg); z-index: 1; }
+        .flower__leaf--3 { transform: translate(-50%, -10%) rotate(0deg); z-index: 2; }
+        .flower__leaf--4, .flower__leaf--5, .flower__leaf--6 { width: 7vmin; height: 12vmin; background: radial-gradient(circle at 50% 20%, #fff7a1 0%, #ffde4d 50%, #ff9900 100%); opacity: 0.9; border: 1px solid #ffdd55; border-radius: 50% 50% 45% 45% / 65% 65% 35% 35%; z-index: 3; }
+        .flower__leaf--4 { transform: translate(-50%, -8%) rotate(-10deg); }
+        .flower__leaf--5 { transform: translate(-50%, -8%) rotate(10deg); }
+        .flower__leaf--6 { transform: translate(-50%, -12%) rotate(0deg); }
+        .flower__center { position: absolute; left: -2vmin; top: -2vmin; width: 4vmin; height: 4vmin; border-radius: 50%; background: radial-gradient(circle at 30% 30%, #ffcc00 0%, #cc6600 80%, #fffde7 100%); border: 2px solid #ffe135; box-shadow: 0 0 1vmin #fffde7; }
+        .flower__line { height: 55vmin; width: 2vmin; background-image: linear-gradient(to left, rgb(0,0,0,0.3), transparent, rgba(255,255,255,0.2)), linear-gradient(to top, transparent 10%, #2d5016, #4a7c23, #6b8e23); box-shadow: inset 0 0 2px rgba(0,0,0,0.7); animation: grow-flower-tree 4s backwards; }
+        .flower__line__leaf { --w: 8vmin; --h: calc(var(--w) + 3vmin); position: absolute; top: 20%; left: 90%; width: var(--w); height: var(--h); border-top-right-radius: var(--h); border-bottom-left-radius: var(--h); background-image: linear-gradient(to top, rgba(45,80,22,0.6), #4a7c23, #6b8e23); }
+        .flower__line__leaf--1 { transform: rotate(70deg) rotateY(30deg); }
+        .flower__line__leaf--2 { top: 45%; transform: rotate(70deg) rotateY(30deg); }
+        .flower__line__leaf--3, .flower__line__leaf--4 { border-top-right-radius: 0; border-bottom-left-radius: 0; border-top-left-radius: var(--h); border-bottom-right-radius: var(--h); left: -460%; top: 12%; transform: rotate(-70deg) rotateY(30deg); }
+        .flower__line__leaf--4 { top: 40%; }
+        .flower__light { position: absolute; bottom: 0vmin; width: 0.8vmin; height: 0.8vmin; background-color: #ffdd00; border-radius: 50%; filter: blur(0.1vmin); animation: tulip-light 6s linear infinite backwards; box-shadow: 0 0 1vmin rgba(255,221,0,0.8); }
+        .flower__grass { --c: #4a7c23; --line-w: 2vmin; position: absolute; bottom: 12vmin; left: -7vmin; display: flex; flex-direction: column; align-items: flex-end; z-index: 20; transform-origin: bottom center; transform: rotate(-48deg) rotateY(40deg); }
+        .ramo { position: absolute; bottom: -22vmin; left: 50%; transform: translateX(-50%); z-index: 0; pointer-events: none; opacity: 0; transition: opacity 1.2s cubic-bezier(.4,0,.2,1); }
+        .ramo--visible { opacity: 1; }
+        .ramo img { width: 45vmin; height: auto; display: block; }
+        @media (max-width: 600px) { .ramo img { width: 72vw; } .ramo { bottom: -15vmin; } }
+        .montes { position: absolute; left: 0; right: 0; bottom: -10px; width: 100%; height: 60px; pointer-events: none; display: flex; justify-content: space-between; opacity: 0; transition: opacity 1.2s; z-index: 1; }
+        .ramo--visible .montes { opacity: 1; }
+        
+        /* Keyframes extra */
+        @keyframes moving-flower-1 { 0%,100%{transform:rotate(2deg)} 50%{transform:rotate(-2deg)} }
+        @keyframes moving-flower-2 { 0%,100%{transform:rotate(18deg)} 50%{transform:rotate(14deg)} }
+        @keyframes moving-flower-3 { 0%,100%{transform:rotate(-18deg)} 50%{transform:rotate(-20deg)} }
+        @keyframes moving-flower-4 { 0%,100%{transform:rotate(9deg)} 50%{transform:rotate(12deg)} }
+        @keyframes moving-flower-5 { 0%,100%{transform:rotate(-5deg)} 50%{transform:rotate(-11deg)} }
+        @keyframes blooming-leaf-right { 0%{ transform-origin: left; transform: rotate(70deg) rotateY(30deg) scale(0); } }
+        @keyframes blooming-leaf-left { 0%{ transform-origin: right; transform: rotate(-70deg) rotateY(30deg) scale(0); } }
+        @keyframes grow-flower-tree { 0%{ height: 0; border-radius: 1vmin; } }
+        @keyframes blooming-flower { 0%{ transform: scale(0); } }
+        @keyframes tulip-light { 0%{ opacity:0; transform:translateY(0vmin);} 20%{opacity:1;} 100%{transform:translateY(-25vmin); opacity:0;} }
+    </style>
+</head>
+<body>
+  <div class="night"></div>
+  <div class="final-overlay"></div>
+  <canvas id="stars-canvas"></canvas>
+  
+  <!-- Título centrado: Para ti, con todo mi amor y los tulipanes -->
+  <div class="titulo-central">🌷 Para ti, con todo mi amor y los tulipanes 🌷</div>
+  
+  <!-- Contenedor de frases izquierda/derecha -->
+  <div class="frases-container">
+    <div class="frases-izq">
+      <p class="frase frase--1">Aunque no siempre<br>estemos sonriendo...</p>
+      <p class="frase frase--3">Hoy contigo<br>es mejor que cualquier ayer..</p>
+      <p class="frase frase--5">Gracias por existir<br>en mi mundo</p>
+    </div>
+    <div class="frases-der">
+      <p class="frase frase--2">Xq incluso en silencio<br>te sigo amando</p>
+      <p class="frase frase--4">Tu mano en la mía<br>es todo lo que necesito</p>
+      <p class="frase frase--6">Te amo más de lo<br>que las palabras alcanzan</p>
+    </div>
+  </div>
+  
+  <!-- TE AMO final amarillo -->
+  <div class="te-amo-final">💛 TE AMO 💛</div>
+  
+  <div class="yellow-particles">
+    <span class="yellow-particle" style="left: 4%; bottom: -6%; animation-duration: 14s;"></span>
+    <span class="yellow-particle" style="left: 9%; bottom: -8%; animation-duration: 11s;"></span>
+    <span class="yellow-particle" style="left: 15%; bottom: -9%; animation-duration: 15s;"></span>
+    <span class="yellow-particle" style="left: 21%; bottom: -10%; animation-duration: 12s;"></span>
+    <span class="yellow-particle" style="left: 28%; bottom: -7%; animation-duration: 16s;"></span>
+    <span class="yellow-particle" style="left: 34%; bottom: -9%; animation-duration: 13s;"></span>
+    <span class="yellow-particle" style="left: 40%; bottom: -8%; animation-duration: 10s;"></span>
+    <span class="yellow-particle" style="left: 47%; bottom: -10%; animation-duration: 17s;"></span>
+    <span class="yellow-particle" style="left: 53%; bottom: -6%; animation-duration: 11.5s;"></span>
+    <span class="yellow-particle" style="left: 58%; bottom: -9%; animation-duration: 14.5s;"></span>
+    <span class="yellow-particle" style="left: 63%; bottom: -8%; animation-duration: 12.8s;"></span>
+    <span class="yellow-particle" style="left: 69%; bottom: -11%; animation-duration: 16.5s;"></span>
+    <span class="yellow-particle" style="left: 74%; bottom: -7%; animation-duration: 13.4s;"></span>
+    <span class="yellow-particle" style="left: 79%; bottom: -9%; animation-duration: 15.8s;"></span>
+    <span class="yellow-particle" style="left: 84%; bottom: -8%; animation-duration: 11.8s;"></span>
+    <span class="yellow-particle" style="left: 89%; bottom: -10%; animation-duration: 14.8s;"></span>
+    <span class="yellow-particle" style="left: 93%; bottom: -6%; animation-duration: 10.8s;"></span>
+    <span class="yellow-particle" style="left: 97%; bottom: -9%; animation-duration: 12.2s;"></span>
+  </div>
+  
+  <div class="shooting-stars"><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div><div class="shooting-star"></div></div>
+  
+  <!-- Flores (estructura original, pero añadidas todas para que se vea el ramo) -->
+  <div class="flowers">
+    <div class="flower flower--1"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div><div class="flower__light"></div><div class="flower__light"></div></div><div class="flower__line"><div class="flower__line__leaf flower__line__leaf--1"></div><div class="flower__line__leaf flower__line__leaf--2"></div><div class="flower__line__leaf flower__line__leaf--3"></div><div class="flower__line__leaf flower__line__leaf--4"></div></div></div>
+    <div class="flower flower--2"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"><div class="flower__line__leaf flower__line__leaf--1"></div><div class="flower__line__leaf flower__line__leaf--2"></div><div class="flower__line__leaf flower__line__leaf--3"></div><div class="flower__line__leaf flower__line__leaf--4"></div></div></div>
+    <div class="flower flower--3"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"><div class="flower__line__leaf flower__line__leaf--1"></div><div class="flower__line__leaf flower__line__leaf--2"></div><div class="flower__line__leaf flower__line__leaf--3"></div><div class="flower__line__leaf flower__line__leaf--4"></div></div></div>
+    <div class="flower flower--4"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"></div></div>
+    <div class="flower flower--5"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"></div></div>
+    <div class="flower flower--6" style="left:20%;transform:rotate(-10deg);z-index:40;"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"></div></div>
+    <div class="flower flower--7" style="left:80%;transform:rotate(15deg);z-index:40;"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"></div></div>
+    <div class="flower flower--8" style="left:35%;transform:rotate(-25deg);z-index:30;"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"></div></div>
+    <div class="flower flower--9" style="left:65%;transform:rotate(25deg);z-index:30;"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"></div></div>
+    <div class="flower flower--10" style="left:12%;transform:rotate(-18deg);z-index:28;"><div class="flower__leafs"><div class="flower__leaf flower__leaf--1"></div><div class="flower__leaf flower__leaf--2"></div><div class="flower__leaf flower__leaf--3"></div><div class="flower__leaf flower__leaf--4"></div><div class="flower__leaf flower__leaf--5"></div><div class="flower__leaf flower__leaf--6"></div><div class="flower__center"></div></div><div class="flower__line"></div></div>
+  </div>
+  
+  <div class="ramo">
+    <img src="https://i.postimg.cc/wMLHRwnK/Gemini-Generated-Image-5pjeq55pjeq55pje-(1).png" alt="Ramo de flores">
+    <div class="montes"><svg class="monte monte-izq" viewBox="0 0 120 60" width="120" height="60"><path d="M0,60 Q30,10 60,60 Q90,30 120,60 Z" fill="#4a7c23" opacity="0.85"/><path d="M10,60 Q35,25 60,60 Q80,40 110,60 Z" fill="#6b8e23" opacity="0.7"/></svg><svg class="monte monte-der" viewBox="0 0 120 60" width="120" height="60"><path d="M0,60 Q30,30 60,60 Q90,10 120,60 Z" fill="#4a7c23" opacity="0.85"/><path d="M10,60 Q40,40 60,60 Q85,25 110,60 Z" fill="#8fcf5a" opacity="0.7"/></svg></div>
+  </div>
+  
+  <audio id="bgAudio" loop>
+    <source src="https://github.com/Baque2005/Organizador/raw/refs/heads/master/Floricienta%20-%20Flores%20Amarillas%20(Official%20Video).mp3" type="audio/mpeg">
+  </audio>
+
+  <script>
+    (function() {
+      const canvas = document.getElementById('stars-canvas');
+      const ctx = canvas.getContext('2d');
+      let stars = [];
+      function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+      function createStars(n) {
+        stars = [];
+        for (let i=0;i<n;i++) stars.push({ x: Math.random() * canvas.width, y: Math.random() * canvas.height * 0.75, r: Math.random() * 1.5 + 0.2, alpha: Math.random() * 0.7 + 0.3, delta: (Math.random() * 0.006 + 0.002) * (Math.random()<0.5?1:-1) });
+      }
+      function drawStars() {
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        stars.forEach(s => { s.alpha += s.delta; if(s.alpha>1||s.alpha<0.15) s.delta*=-1; ctx.beginPath(); ctx.arc(s.x,s.y,s.r,0,Math.PI*2); ctx.fillStyle = `rgba(200,220,255,${s.alpha})`; ctx.fill(); });
+        requestAnimationFrame(drawStars);
+      }
+      resize(); createStars(220); drawStars();
+      window.addEventListener('resize', ()=>{ resize(); createStars(220); });
+    })();
+    
+    // ramo visible
+    setTimeout(() => document.querySelector('.ramo')?.classList.add('ramo--visible'), 2500);
+    
+    // ---- ANIMACIÓN DE FRASES (alternar izquierda y derecha) ----
+    const frasesIzq = document.querySelectorAll('.frases-izq .frase');
+    const frasesDer = document.querySelectorAll('.frases-der .frase');
+    const todasFrases = [...frasesIzq, ...frasesDer];
+    todasFrases.forEach(f => f.classList.remove('visible'));
+    
+    let currentIndex = 0;
+    let animationActive = true;
+    let timeoutId = null;
+    
+    // Orden de aparición: izquierda(1), derecha(2), izquierda(3), derecha(4), izquierda(5), derecha(6)
+    const ordenSecuencia = [
+      { lado: 'izq', idx: 0 },  // frase--1 (Aunque no siempre)
+      { lado: 'der', idx: 0 },  // frase--2 (Xq incluso en silencio)
+      { lado: 'izq', idx: 1 },  // frase--3 (Hoy contigo)
+      { lado: 'der', idx: 1 },  // frase--4 (Tu mano en la mía)
+      { lado: 'izq', idx: 2 },  // frase--5 (Gracias por existir)
+      { lado: 'der', idx: 2 }   // frase--6 (Te amo más de lo que palabras)
+    ];
+    
+    function ocultarTodas() {
+      todasFrases.forEach(f => { f.classList.remove('visible'); f.classList.add('ocultar'); });
+    }
+    
+    function mostrarFrase(step) {
+      if (!animationActive) return;
+      if (step >= ordenSecuencia.length) {
+        // Terminó la secuencia de frases → activar TE AMO final y oscurecer fondo
+        animationActive = false;
+        document.body.classList.add('final-te-amo');
+        // opcional: también pausar música suavemente? no se pide, pero queda ambiente
+        return;
+      }
+      const item = ordenSecuencia[step];
+      const grupo = item.lado === 'izq' ? frasesIzq : frasesDer;
+      const fraseElem = grupo[item.idx];
+      if (!fraseElem) return;
+      
+      // ocultar todas primero para limpiar
+      ocultarTodas();
+      // mostrar la nueva
+      fraseElem.classList.remove('ocultar');
+      fraseElem.classList.add('visible');
+      
+      // Tiempo de aparición: 3.5 segundos visible, luego pasar a la siguiente
+      timeoutId = setTimeout(() => {
+        mostrarFrase(step + 1);
+      }, 3800);
+    }
+    
+    // Iniciar después de que cargue todo y dar un pequeño delay para que se vea natural
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        if (animationActive) mostrarFrase(0);
+      }, 800);
+    });
+    
+    // Música (sin botón de música, pero igual se reproduce automáticamente / sin icono)
+    const audio = document.getElementById('bgAudio');
+    audio.loop = true;
+    audio.volume = 0.6;
+    window.addEventListener('load', () => {
+      audio.play().catch(e => console.log("autoplay bloqueado, pero el usuario puede interactuar"));
+    });
+    // también por si el navegador bloquea, se puede activar con un toque suave pero no hay botón,
+    // pero se deja autoplay silencioso compatible. El usuario puede tocar en cualquier lado para reanudar? opcional
+    document.body.addEventListener('click', () => { if(audio.paused) audio.play().catch(()=>{}); }, { once: true });
+  </script>
+</body>
+</html>
